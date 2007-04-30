@@ -22,7 +22,7 @@
 #   Cheat Mountain, one of the highest mountains in the Alleghenies
 #
 %w[rubygems camping camping/db erb open-uri acts_as_versioned wrap diffr responder].each { |f| require f }
-require_gem 'camping', '>=1.4.152'
+gem 'camping', '>=1.4.152'
 
 Camping.goes :Cheat
 
