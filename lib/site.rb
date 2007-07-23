@@ -28,8 +28,8 @@ Camping.goes :Cheat
 
 # for defunkt. campistrano.
 if ARGV.include? '--update'
-  ssh = 'ssh chris@errtheblog.com'
-  puts `#{ssh} 'cd sites/cheat; svn up'`
+  ssh = 'ssh deploy@errtheblog.com'
+  puts `#{ssh} 'cd /var/www/cheat; svn up'`
   system "#{ssh} 'sudo /etc/init.d/rv restart'"
   exit 
 end
