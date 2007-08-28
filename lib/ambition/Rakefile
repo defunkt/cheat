@@ -21,3 +21,9 @@ Rake::RDocTask.new(:rdoc) do |rdoc|
   rdoc.rdoc_dir = 'doc' # rdoc output folder
   rdoc.options << '--inline-source'
 end
+
+desc 'Generate coverage reports'
+task :rcov do
+  `rcov -e gems test/*_test.rb`
+  puts 'Generated coverage reports.'
+end

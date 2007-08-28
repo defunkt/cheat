@@ -8,8 +8,6 @@ module Ambition
   class OrderProcessor < Processor 
     def initialize(table_name, block)
       super()
-      @prefix      = 'ORDER BY '
-      @join_string = ', '
       @receiver    = nil
       @table_name  = table_name
       @block       = block

@@ -5,8 +5,16 @@ module Ambition
       find(limit == 1 ? :first : :all, query_context.to_hash)
     end
 
-    def [](offset, limit)
-      first(offset, limit)
+    def [](offset, limit = nil)
+      return first(offset, limit) if limit
+
+      if offset.is_a? Range
+        limit  = offset.end
+        limit -= 1 if offset.exclude_end?
+        first(offset.first, limit - offset.first)
+      else
+        first(offset, 1)
+      end
     end
   end
 
@@ -15,20 +23,8 @@ module Ambition
       @args = args
     end
 
-    def prefix
-      'LIMIT '
-    end
-
     def key
       :limit
-    end
-
-    def join_string
-      ', '
-    end
-
-    def to_sql
-      "LIMIT #{to_s}"
     end
 
     def to_s

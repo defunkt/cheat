@@ -39,10 +39,6 @@ module Ambition
 
     ##
     # Helper methods
-    def to_sql
-      @prefix.to_s + to_s
-    end
-
     def to_s
       process(@block.to_sexp).squeeze(' ')
     end

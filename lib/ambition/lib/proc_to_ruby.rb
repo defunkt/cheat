@@ -25,9 +25,8 @@ end
 
 class Proc
   def to_method
-    name = Unique.next
-    Unique.send(:define_method, name, self)
-    Unique.new.method(name)
+    Unique.send(:define_method, :proc_to_method, self)
+    Unique.new.method(:proc_to_method)
   end
 
   def to_sexp

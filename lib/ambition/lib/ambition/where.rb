@@ -20,8 +20,6 @@ module Ambition
 
     def initialize(owner, block)
       super()
-      @prefix      = 'WHERE '
-      @join_string = ' AND '
       @receiver    = nil
       @owner       = owner
       @table_name  = owner.table_name
