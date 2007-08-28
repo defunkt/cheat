@@ -1,0 +1,143 @@
+== Ambitious SQL
+
+A simple experiment and even simpler ActiveRecord library.
+
+I could tell you all about how awesome the internals are, or 
+how fun it was to write, or how it'll make you rich and famous, 
+but instead I'm just going to show you some examples. 
+
+== Examples
+
+Basically, you write your SQL in Ruby.  No, not in Ruby.  As Ruby.
+
+  User.select { |u| u.city == 'San Francisco' }.each do |user|
+    puts user.name
+  end
+
+And that's it.
+
+The key is the +each+ method.  You build up a +Query+ using +select+, +detect+,
++limit+, and +sort_by+, then call +each+ on it.  This'll run the query and enumerate
+through the results.
+
+Our +Query+ object has two useful methods: +to_sql+ and +to_hash+.  With these, we can
+check out what exactly we're building.
+
+See, +to_sql+:
+  >> User.select { |m| m.name == 'jon' }.to_sql
+  => "SELECT * FROM users WHERE users.`name` = 'jon'"
+
+See, +to_hash+:
+  >> User.select { |m| m.name == 'jon' }.to_hash
+  => {:conditions=>"users.`name` = 'jon'"} 
+
+== Limitations
+
+You can use variables, but any more complex Ruby (right now) won't work
+inside your blocks.  Just do it outside the block and assign it to a variable, okay?
+
+Instead of:
+  User.select { |m| m.date == 2.days.ago }
+
+Just do:
+  date = 2.days.ago
+  User.select { |m| m.date == date }
+
+Instance variables and globals work, too.
+
+== Equality -- select { |u| u.field == 'bob' }
+
+  >> User.select { |m| m.name == 'jon' }.to_sql
+  => "SELECT * FROM users WHERE users.`name` = 'jon'"
+
+  >> User.select { |m| m.name != 'jon' }.to_sql
+  => "SELECT * FROM users WHERE users.`name` <> 'jon'"
+
+  >> User.select { |m| m.name == 'jon' && m.age == 21 }.to_sql
+  => "SELECT * FROM users WHERE (users.`name` = 'jon' AND users.`age` = 21)"
+
+  >> User.select { |m| m.name == 'jon' || m.age == 21 }.to_sql
+  => "SELECT * FROM users WHERE (users.`name` = 'jon' OR users.`age` = 21)"
+    
+  >> User.select { |m| m.name == 'jon' || m.age == 21 && m.password == 'pass' }.to_sql
+  => "SELECT * FROM users WHERE (users.`name` = 'jon' OR (users.`age` = 21 AND users.`password` = 'pass'))"
+
+  >> User.select { |m| (m.name == 'jon' || m.name == 'rick') && m.age == 21 }.to_sql
+  => "SELECT * FROM users WHERE ((users.`name` = 'jon' OR users.`name` = 'rick') AND users.`age` = 21)"
+
+== Comparisons -- select { |u| u.age > 21 }
+
+  >> User.select { |m| m.age > 21 }.to_sql
+  => "SELECT * FROM users WHERE users.`age` > 21"
+
+  >> User.select { |m| m.age < 21 }.to_sql
+  => "SELECT * FROM users WHERE users.`age` < 21"
+
+  >> sql = User.select { |m| [1, 2, 3, 4].include? m.id }.to_sql
+  => "SELECT * FROM users WHERE users.`id` IN (1, 2, 3, 4)"
+
+== LIKE and REGEXP (RLIKE) -- select { |m| m.name =~ 'chris' }
+
+  >> User.select { |m| m.name =~ 'chris' }.to_sql
+  => "SELECT * FROM users WHERE users.`name` LIKE 'chris'"
+
+  >> User.select { |m| m.name =~ 'chri%' }.to_sql
+  => "SELECT * FROM users WHERE users.`name` LIKE 'chri%'"
+
+  >> User.select { |m| m.name !~ 'chris' }.to_sql
+  => "SELECT * FROM users WHERE users.`name` NOT LIKE 'chris'"
+
+  >> User.select { |m| !(m.name =~ 'chris') }.to_sql
+  => "SELECT * FROM users WHERE users.`name` NOT LIKE 'chris'"
+
+  >> User.select { |m| m.name =~ /chris/ }.to_sql
+  => "SELECT * FROM users WHERE users.`name` REGEXP 'chris'"
+
+== #detect
+
+  >> User.detect { |m| m.name == 'chris' }.to_sql
+  => "SELECT * FROM users WHERE users.`name` = 'chris' LIMIT 1"
+
+== LIMITs -- first, first(x), [offset, limit]
+
+  >> User.select { |m| m.name == 'jon' }.first.to_sql
+  => "SELECT * FROM users WHERE users.`name` = 'jon' LIMIT 1"
+
+  >> User.select { |m| m.name == 'jon' }.first(5).to_sql
+  => "SELECT * FROM users WHERE users.`name` = 'jon' LIMIT 5"
+
+  >> User.select { |m| m.name == 'jon' }[10, 20].to_sql
+  => "SELECT * FROM users WHERE users.`name` = 'jon' LIMIT 10, 20"
+
+== ORDER -- sort_by { |u| u.field }
+
+  >> User.select { |m| m.name == 'jon' }.sort_by { |m| m.name }.to_sql
+  => "SELECT * FROM users WHERE users.`name` = 'jon' ORDER BY name"
+
+  >> User.select { |m| m.name == 'jon' }.sort_by { |m| [ m.name,  m.age ] }.to_sql
+  => "SELECT * FROM users WHERE users.`name` = 'jon' ORDER BY name, age"
+
+  >> User.select { |m| m.name == 'jon' }.sort_by { |m| [ m.name,  -m.age ] }.to_sql
+  => "SELECT * FROM users WHERE users.`name` = 'jon' ORDER BY name, age DESC"
+
+  >> User.select { |m| m.name == 'jon' }.sort_by { |m| [ -m.name,  -m.age ] }.to_sql
+  => "SELECT * FROM users WHERE users.`name` = 'jon' ORDER BY name DESC, age DESC"
+
+  >> User.select { |m| m.name == 'jon' }.sort_by { |m| -m.age }.to_sql
+  => "SELECT * FROM users WHERE users.`name` = 'jon' ORDER BY age DESC"
+
+  >> User.select { |m| m.name == 'jon' }.sort_by { rand }.to_sql
+  => "SELECT * FROM users WHERE users.`name` = 'jon' ORDER BY RAND()"
+
+== COUNT -- select { |u| u.name == 'jon' }.size
+
+  >> User.select { |m| m.name == 'jon' }.size
+  => 21
+
+== SELECT * FROM bugs 
+
+Found a bug?  Sweet.  Add it at the Lighthouse: http://err.lighthouseapp.com/projects/466-plugins/tickets/new
+
+Feature requests are welcome.  Ideas for cross-table stuff and joins, especially.
+
+* Chris Wanstrath [ chris@ozmm.org ]

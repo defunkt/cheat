@@ -24,6 +24,9 @@
 %w[rubygems camping camping/db erb open-uri acts_as_versioned wrap diffr responder].each { |f| require f }
 gem 'camping', '>=1.4.152'
 
+$:.unshift File.dirname(__FILE__) + '/ambition/lib'
+require 'ambition'
+
 Camping.goes :Cheat
 
 # for defunkt. campistrano.
@@ -70,7 +73,7 @@ module Cheat::Controllers
     def get(title)
       @headers['Content-Type'] = 'text/plain'
 
-      sheet = Sheet.find_by_title(title)
+      sheet = Sheet.detect { |s| s.title == title }
       return { 'Error!' => "Cheat sheet `#{title}' not found." }.to_yaml unless sheet
 
       return { sheet.title => sheet.body }.to_yaml
@@ -81,7 +84,8 @@ module Cheat::Controllers
     def get
       @headers['Content-Type'] = 'text/plain'
 
-      return { 'Recent Cheat Sheets' => Sheet.find(:all, :order => 'created_at DESC', :limit => 15).map(&:title) }.to_yaml
+      sheets = Sheet.sort_by { |s| -s.created_at }.first(15).map(&:title)
+      return { 'Recent Cheat Sheets' => sheets }.to_yaml
     end
   end
 
@@ -89,7 +93,8 @@ module Cheat::Controllers
     def get
       @headers['Content-Type'] = 'text/plain'
 
-      return { 'All Cheat Sheets' => Sheet.find(:all, :order => 'title ASC').map(&:title) }.to_yaml
+      sheets = Sheet.sort_by(&:title).map(&:title)
+      return { 'All Cheat Sheets' => sheets }.to_yaml
     end
   end
 
@@ -115,7 +120,8 @@ module Cheat::Controllers
   
   class Edit < R '/e/(\w+)/(\d+)', '/e/(\w+)'
     def get(title, version = nil)
-      @sheet = Sheet.find_by_title(title)
+      @sheet = Sheet.detect { |s| s.title == title }
+
       @error = "Cheat sheet not found." unless @sheet
       unless version.nil? || version == @sheet.version.to_s        
         @sheet = @sheet.find_version(version)
@@ -127,6 +133,7 @@ module Cheat::Controllers
   class Write < R '/w', '/w/(\w+)'
     def post(title = nil)
       @sheet = title ? Sheet.find_by_title(title) : Sheet.new
+      @sheet = title ? Sheet.detect { |s| s.title == title } : Sheet.new
   
       check_captcha! unless input.from_gem
 
@@ -149,14 +156,14 @@ module Cheat::Controllers
   
   class Browse < R '/b'
     def get
-      @sheets = Sheet.find(:all, :order => 'title ASC')
+      @sheets = Sheet.sort_by(&:title)
       render :browse
     end
   end
   
   class Show < R '/s/(\w+)', '/s/(\w+)/(\d+)'
     def get(title, version = nil)
-      @sheet = Sheet.find_by_title(title)
+      @sheet = Sheet.detect { |s| s.title == title }
       @sheet = @sheet.find_version(version) if version && @sheet    
 
       @sheet ? render(:show) : redirect("#{URL}/b/")
@@ -171,7 +178,7 @@ module Cheat::Controllers
     def get(title, old_version, new_version = nil)
       redirect "#{URL}/b/" and return unless old_version.to_i.nonzero?
 
-      @sheet = Sheet.find_by_title(title)
+      @sheet = Sheet.detect { |s| s.title == title }
       @old_sheet = @sheet.find_version(old_version)
       @new_sheet = (new_version ? @sheet.find_version(new_version) : @sheet)
 
@@ -188,11 +195,13 @@ module Cheat::Controllers
     include Responder
 
     def get(title)
-      @sheets = Sheet.find_by_title(title).find_versions(:order => 'version DESC')
+      if sheets = Sheet.detect { |s| s.title == title }
+        @sheets = sheets.find_versions(:order => 'version DESC')
+      end
 
       respond_to do |wants|
         wants.html { render :history }
-        wants.yaml { { @sheets.first.title => @sheets.map { |s| s.version } }.to_yaml }
+        wants.yaml { { @sheets.first.title => @sheets.map(&:version) }.to_yaml }
       end
     end
   end
@@ -426,7 +435,7 @@ module Cheat::Views
       xml.id URL + '/'
       xml.link "rel" => "self", "href" => FEED
 
-      sheets = Cheat::Models::Sheet.find(:all, :order => 'updated_at DESC', :limit => 20)
+      sheets = Cheat::Models::Sheet.sort_by { |s| -s.updated_at }.first(20)
       xml.updated sheets.first.updated_at.xmlschema
 
       sheets.each do |sheet|
@@ -536,11 +545,12 @@ module Cheat::Helpers
   end
   
   def current_sheet
-    @current_sheet ||= Cheat::Models::Sheet.find_by_title(@sheet.title)
+    title = @sheet.title
+    @current_sheet ||= Cheat::Models::Sheet.detect { |s| s.title == title }
   end
   
   def recent_sheets
-    Cheat::Models::Sheet.find(:all, :order => 'updated_at DESC', :limit => 15)
+    Cheat::Models::Sheet.sort_by { |s| -s.updated_at }.first(15)
   end
   
   def sheet_link(title, version = nil)
