@@ -21,11 +21,8 @@
 #   Cheat Lake, a nearby resevoir
 #   Cheat Mountain, one of the highest mountains in the Alleghenies
 #
-%w[rubygems camping camping/db erb open-uri acts_as_versioned wrap diffr responder].each { |f| require f }
+%w[rubygems camping camping/db erb open-uri acts_as_versioned wrap diffr responder ambition].each { |f| require f }
 gem 'camping', '>=1.4.152'
-
-$:.unshift File.dirname(__FILE__) + '/ambition/lib'
-require 'ambition'
 
 Camping.goes :Cheat
 
