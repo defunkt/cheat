@@ -94,7 +94,7 @@ module Cheat
     puts sheet.first + ':'
     puts '  ' + sheet.last.gsub("\r",'').gsub("\n", "\n  ").wrap
   rescue
-    puts "That didn't work.  Maybe try `$ cheat cheat' for help?"
+    puts "That didn't work.  Maybe try `$ cheat cheat' for help?" # Fix Emacs ruby-mode highlighting bug: `"
   end
 
   def edit(sheet_yaml)
