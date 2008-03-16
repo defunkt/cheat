@@ -181,6 +181,7 @@ module Cheat
     write.close
     ENV['LESS'] = 'FSRX' # Don't page if the input is short enough
     exec ENV['PAGER'] || 'less'
+  rescue
   end
 end
 
