@@ -179,6 +179,7 @@ module Cheat
 
     # Parent process, become pager
     write.close
+    ENV['LESS'] = 'FSRX' # Don't page if the input is short enough
     exec ENV['PAGER'] || 'less'
   end
 end
