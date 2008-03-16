@@ -91,6 +91,7 @@ module Cheat
   def show(sheet_yaml)
     sheet = YAML.load(sheet_yaml).to_a.first
     sheet[-1] = sheet.last.join("\n") if sheet[-1].is_a?(Array)
+    run_pager
     puts sheet.first + ':'
     puts '  ' + sheet.last.gsub("\r",'').gsub("\n", "\n  ").wrap
   rescue
@@ -162,6 +163,20 @@ module Cheat
 
   def clear_cache
     FileUtils.rm_rf(cache_dir) if cache_dir
+  end
+
+  def run_pager    
+    read, write = IO.pipe
+    STDIN.reopen(read)
+
+    unless pid = Kernel.fork # Child process
+      STDOUT.reopen(write)
+      return
+    end
+
+    # Parent process, become pager
+    write.close
+    exec ENV['PAGER'] || 'less'
   end
 end
 
