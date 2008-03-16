@@ -165,7 +165,10 @@ module Cheat
     FileUtils.rm_rf(cache_dir) if cache_dir
   end
 
-  def run_pager    
+  def run_pager
+    return if PLATFORM =~ /win32/
+    return unless STDOUT.tty?
+
     read, write = IO.pipe
     STDIN.reopen(read)
 
