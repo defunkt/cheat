@@ -172,7 +172,7 @@ module Cheat
     read, write = IO.pipe
     STDIN.reopen(read)
 
-    unless pid = Kernel.fork # Child process
+    unless Kernel.fork # Child process
       STDOUT.reopen(write)
       return
     end
