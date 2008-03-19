@@ -35,7 +35,7 @@ package_dir_path = "#{package_dir}/#{package_name}"
 
 gem_file = "#{package_name}.gem"
 
-task :gem  => SOURCE_FILES + [ "#{package_dir}/#{gem_file}" ]
+task :gem  => "#{package_dir}/#{gem_file}"
 
 desc "Build all packages"
 task :package => [ :gem ]
@@ -57,7 +57,7 @@ file package_dir_path do
   end
 end
 
-file "#{package_dir}/#{gem_file}" => package_dir do
+file "#{package_dir}/#{gem_file}" => SOURCE_FILES + [ package_dir ] do
   spec = Gem::Specification.new do |s|
   	s.name = PACKAGE_NAME
   	s.version = PACKAGE_VERSION
