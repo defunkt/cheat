@@ -175,7 +175,7 @@ module Cheat
 
     unless Kernel.fork # Child process
       STDOUT.reopen(write)
-      STDERR.reopen(write)
+      STDERR.reopen(write) if STDERR.tty?
       read.close
       write.close
       return
