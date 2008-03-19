@@ -94,6 +94,8 @@ module Cheat
     run_pager
     puts sheet.first + ':'
     puts '  ' + sheet.last.gsub("\r",'').gsub("\n", "\n  ").wrap
+  rescue Errno::EPIPE
+    # do nothing
   rescue
     puts "That didn't work.  Maybe try `$ cheat cheat' for help?" # Fix Emacs ruby-mode highlighting bug: `"
   end
@@ -174,6 +176,8 @@ module Cheat
     unless Kernel.fork # Child process
       STDOUT.reopen(write)
       STDERR.reopen(write)
+      read.close
+      write.close
       return
     end
 
