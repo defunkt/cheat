@@ -170,17 +170,24 @@ module Cheat
     return unless STDOUT.tty?
 
     read, write = IO.pipe
-    STDIN.reopen(read)
 
     unless Kernel.fork # Child process
       STDOUT.reopen(write)
+      STDERR.reopen(write)
       return
     end
 
     # Parent process, become pager
+    STDIN.reopen(read)
+    read.close
     write.close
+
     ENV['LESS'] = 'FSRX' # Don't page if the input is short enough
-    exec ENV['PAGER'] || 'less'
+
+    # wait until we have input before we start the pager
+    Kernel.select [STDIN]
+    pager = ENV['PAGER'] || 'less'
+    exec pager rescue exec "/bin/sh", "-c", pager
   rescue
   end
 end
