@@ -18,8 +18,9 @@ module Cheat
     uri = "http://#{cheat_uri}/y/"
 
     if %w[sheets all recent].include? @sheet
+      options = headers.update(proxy_options)
       uri = uri.sub('/y/', @sheet == 'recent' ? '/yr/' : '/ya/')
-      return open(uri) { |body| show(body.read) } 
+      return open(uri,options) { |body| show(body.read) }
     end
 
     return show(File.read(cache_file)) if File.exists?(cache_file) rescue clear_cache if cache_file 
@@ -28,7 +29,8 @@ module Cheat
   end
 
   def fetch_sheet(uri, try_to_cache = true)
-    open(uri, headers) do |body|
+    options = headers.update(proxy_options)
+    open(uri, options) do |body|
       sheet = body.read
       File.open(cache_file, 'w') { |f| f.write(sheet) } if try_to_cache && cache_file && !@edit 
       @edit ? edit(sheet) : show(sheet)
@@ -82,6 +84,18 @@ module Cheat
 
   def headers
     { 'User-Agent' => 'cheat!', 'Accept' => 'text/yaml' } 
+  end
+  
+  def proxy_options
+    if ENV['HTTP_PROXY'] || ENV['http_proxy']
+      proxy_array = []
+      proxy_array << (ENV['HTTP_PROXY'] || ENV['http_proxy'])
+      proxy_array << (ENV['HTTP_PROXY_USER'] || ENV['http_proxy_user'] || '')
+      proxy_array << (ENV['HTTP_PROXY_PASS'] || ENV['http_proxy_pass'] || '')
+      {:proxy_http_basic_authentication => proxy_array}
+    else
+      {}
+    end
   end
 
   def cheat_uri
