@@ -4,7 +4,7 @@ require 'rubygems'
 require 'rake'
 
 PACKAGE_NAME    = "cheat"
-PACKAGE_VERSION = "1.2.1"
+PACKAGE_VERSION = "1.2.2"
 
 SOURCE_FILES = FileList.new do |fl|
   [ "bin", "lib", "test" ].each do |dir|

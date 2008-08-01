@@ -20,10 +20,10 @@ module Cheat
     if %w[sheets all recent].include? @sheet
       options = headers.update(proxy_options)
       uri = uri.sub('/y/', @sheet == 'recent' ? '/yr/' : '/ya/')
-      return open(uri,options) { |body| show(body.read) }
+      return open(uri,options) { |body| process(body.read) }
     end
 
-    return show(File.read(cache_file)) if File.exists?(cache_file) rescue clear_cache if cache_file 
+    return process(File.read(cache_file)) if File.exists?(cache_file) rescue clear_cache if cache_file 
 
     fetch_sheet(uri + @sheet) if @sheet
   end
@@ -32,6 +32,7 @@ module Cheat
     options = headers.update(proxy_options)
     open(uri, options) do |body|
       sheet = body.read
+      FileUtils.mkdir_p(cache_dir) unless File.exists?(cache_dir)
       File.open(cache_file, 'w') { |f| f.write(sheet) } if try_to_cache && cache_file && !@edit 
       @edit ? edit(sheet) : show(sheet)
     end 
@@ -56,7 +57,8 @@ module Cheat
 
     add(args.shift) and return if args.delete('--add')
     clear_cache if @edit = args.delete('--edit')
-
+    
+    @execute = true if args.delete("--execute") || args.delete("-x")
     @sheet = args.shift
 
     true
@@ -100,6 +102,31 @@ module Cheat
 
   def cheat_uri
     "#{HOST}:#{PORT}#{SUFFIX}"
+  end
+
+  def execute(sheet_yaml)
+    sheet_body = YAML.load(sheet_yaml).to_a.flatten.last
+    puts "\n  " + sheet_body.gsub("\r",'').gsub("\n", "\n  ").wrap
+    puts "\nWould you like to execute the above sheet? (Y/N)"
+    answer = STDIN.gets
+    case answer.chomp
+    when "Y" then system YAML.load(sheet_yaml).to_a.flatten.last
+    when "N" then puts "Not executing sheet."
+    else
+      puts "Must be Y or N!"
+    end
+  rescue Errno::EPIPE
+    # do nothing
+  rescue
+    puts "That didn't work.  Maybe try `$ cheat cheat' for help?" # Fix Emacs ruby-mode highlighting bug: `"
+  end
+
+  def process(sheet_yaml)
+    if @execute
+      execute(sheet_yaml)
+    else
+      show(sheet_yaml)
+    end
   end
 
   def show(sheet_yaml)

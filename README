@@ -19,6 +19,11 @@ To add a cheat sheet, use the --add switch.
 
 $ cheat readme --add
 
+To execute a sheet, use the --execute or -x switch.
+
+$ cheat rspec_rails_install_edge --execute
+$ cheat rspec_rails_install_edge --x
+
 Special Thanks To:
 - Evan Weaver
 - Kevin Marsh
