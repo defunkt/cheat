@@ -1,5 +1,5 @@
 $:.unshift File.dirname(__FILE__)
-%w[rubygems tempfile fileutils net/http yaml rubygems/open-uri wrap].each { |f| require f }
+%w[rubygems tempfile fileutils net/http yaml open-uri wrap].each { |f| require f }
 
 module Cheat
   extend self
@@ -18,9 +18,8 @@ module Cheat
     uri = "http://#{cheat_uri}/y/"
 
     if %w[sheets all recent].include? @sheet
-      options = headers.update(proxy_options)
       uri = uri.sub('/y/', @sheet == 'recent' ? '/yr/' : '/ya/')
-      return open(uri,options) { |body| process(body.read) }
+      return open(uri, headers) { |body| process(body.read) }
     end
 
     return process(File.read(cache_file)) if File.exists?(cache_file) rescue clear_cache if cache_file 
@@ -29,8 +28,7 @@ module Cheat
   end
 
   def fetch_sheet(uri, try_to_cache = true)
-    options = headers.update(proxy_options)
-    open(uri, options) do |body|
+    open(uri, headers) do |body|
       sheet = body.read
       FileUtils.mkdir_p(cache_dir) unless File.exists?(cache_dir)
       File.open(cache_file, 'w') { |f| f.write(sheet) } if try_to_cache && cache_file && !@edit 
@@ -88,18 +86,6 @@ module Cheat
     { 'User-Agent' => 'cheat!', 'Accept' => 'text/yaml' } 
   end
   
-  def proxy_options
-    if ENV['HTTP_PROXY'] || ENV['http_proxy']
-      proxy_array = []
-      proxy_array << (ENV['HTTP_PROXY'] || ENV['http_proxy'])
-      proxy_array << (ENV['HTTP_PROXY_USER'] || ENV['http_proxy_user'] || '')
-      proxy_array << (ENV['HTTP_PROXY_PASS'] || ENV['http_proxy_pass'] || '')
-      {:proxy_http_basic_authentication => proxy_array}
-    else
-      {}
-    end
-  end
-
   def cheat_uri
     "#{HOST}:#{PORT}#{SUFFIX}"
   end
