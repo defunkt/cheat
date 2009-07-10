@@ -65,7 +65,7 @@ module Cheat::Controllers
     def get(title)
       @headers['Content-Type'] = 'text/plain'
 
-      sheet = Sheet.detect { |s| s.title == title }
+      sheet = Sheet.find_by_title(title)
       return { 'Error!' => "Cheat sheet `#{title}' not found." }.to_yaml unless sheet
 
       return { sheet.title => sheet.body }.to_yaml
