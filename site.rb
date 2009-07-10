@@ -545,7 +545,7 @@ module Cheat::Helpers
   end
 
   def recent_sheets
-    Array(Cheat::Models::Sheet.sort_by { |s| -s.updated_at }).first(15)
+    Cheat::Models::Sheet.sort_by { |s| -s.updated_at }.first(15)
   end
 
   def sheet_link(title, version = nil)
