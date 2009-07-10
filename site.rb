@@ -605,5 +605,6 @@ if __FILE__ == $0
 else
   dbconfig = YAML.load(File.read('config/database.yml'))
   Cheat::Models::Base.establish_connection dbconfig['production']
+  Cheat::Models::Base.partial_updates = false
   Cheat.create unless Cheat::Models::Sheet.table_exists?
 end
