@@ -472,9 +472,9 @@ module Cheat::Views
     text "Powered by "
     a 'Camping', :href => "http://code.whytheluckystiff.net/camping"
     text ", "
-    a 'Mongrel', :href => "http://mongrel.rubyforge.org/"
+    a 'Heroku', :href => "http://heroku.com/"
     text " and, to a lesser extent, "
-    a 'Err the Blog', :href => "http://errtheblog.com/"
+    a 'GitHub', :href => "http://github.com/"
     text "."
   end
 
