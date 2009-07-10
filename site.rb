@@ -76,7 +76,7 @@ module Cheat::Controllers
     def get
       @headers['Content-Type'] = 'text/plain'
 
-      sheets = Sheet.sort_by { |s| -s.created_at }.first(15).map(&:title)
+      sheets = Sheet.find(:all, :order => 'created_at desc', :limit => 15).map(&:title)
       return { 'Recent Cheat Sheets' => sheets }.to_yaml
     end
   end
@@ -85,7 +85,7 @@ module Cheat::Controllers
     def get
       @headers['Content-Type'] = 'text/plain'
 
-      sheets = Sheet.sort_by(&:title).map(&:title)
+      sheets = Sheet.find(:all, :order => 'title asc').map(&:title)
       return { 'All Cheat Sheets' => sheets }.to_yaml
     end
   end
@@ -112,7 +112,7 @@ module Cheat::Controllers
 
   class Edit < R '/e/(\w+)/(\d+)', '/e/(\w+)'
     def get(title, version = nil)
-      @sheet = Sheet.detect { |s| s.title == title }
+      @sheet = Sheet.find_by_title(title)
 
       @error = "Cheat sheet not found." unless @sheet
       unless version.nil? || version == @sheet.version.to_s
@@ -125,7 +125,6 @@ module Cheat::Controllers
   class Write < R '/w', '/w/(\w+)'
     def post(title = nil)
       @sheet = title ? Sheet.find_by_title(title) : Sheet.new
-      @sheet = title ? Sheet.detect { |s| s.title == title } : Sheet.new
 
       check_captcha! unless input.from_gem
 
@@ -173,7 +172,7 @@ module Cheat::Controllers
     def get(title, old_version, new_version = nil)
       redirect "#{URL}/b/" and return unless old_version.to_i.nonzero?
 
-      @sheet = Sheet.detect { |s| s.title == title }
+      @sheet = Sheet.find_by_title(title)
       @old_sheet = @sheet.find_version(old_version)
       @new_sheet = (new_version ? @sheet.find_version(new_version) : @sheet)
 
@@ -190,7 +189,7 @@ module Cheat::Controllers
     include Responder
 
     def get(title)
-      if sheets = Sheet.detect { |s| s.title == title }
+      if sheets = Sheet.find_by_title(title)
         @sheets = sheets.find_versions(:order => 'version DESC')
       end
 
