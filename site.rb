@@ -600,7 +600,7 @@ if __FILE__ == $0
   puts "** Cheat is running at http://0.0.0.0:8020/"
   server.run.join
 else
-  Cheat.create unless Cheat::Models::Sheet.table_exists?
   dbconfig = YAML.load(File.read('config/database.yml'))
   Cheat::Models::Base.establish_connection dbconfig['production']
+  Cheat.create unless Cheat::Models::Sheet.table_exists?
 end
