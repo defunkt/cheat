@@ -214,7 +214,7 @@ module Cheat::Views
         div.main {
           div.header {
             h1 { logo_link 'cheat sheets.' }
-            code.header @sheet_title ? "$ cheat #{@sheet_title}" : "$ command line ruby cheat sheets"
+            code.header @sheet_title ? "$ cheat #{@sheet_title}" : "$ command line cheat sheets"
             }
           div.content { self << yield }
           div.side { _side }
