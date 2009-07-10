@@ -208,7 +208,7 @@ module Cheat::Views
       head {
         _style
         link :href => FEED, :rel => "alternate", :title => "Recently Updated Cheat Sheets", :type => "application/atom+xml"
-        title @page_title ? "$ cheat #{@page_title}" : "$ command line ruby cheat sheets"
+        title @page_title ? "$ cheat #{@page_title}" : "$ command line cheat sheets"
       }
       body {
         div.main {
@@ -387,7 +387,7 @@ module Cheat::Views
     p {
       text "Welcome.  You've reached the central repository for "
       strong "cheat"
-      text ", the RubyGem which puts Ruby-centric cheat sheets right into your
+      text ", the RubyGem which puts cheat sheets right into your
             terminal.  The inaugural blog entry "
       a "is here", :href => "http://errtheblog.com/post/23"
       text "."
