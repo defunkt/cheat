@@ -1,4 +1,0 @@
-#!/usr/bin/env ruby
-require 'rubygems'
-require 'cheat'
-Cheat.sheets(ARGV)
