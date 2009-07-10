@@ -117,7 +117,7 @@ module ActiveRecord #:nodoc:
           
           self.versioned_class_name = options[:class_name] || "#{self.to_s.demodulize}Version"
           self.versioned_foreign_key = options[:foreign_key] || self.to_s.foreign_key
-          self.versioned_table_name = options[:table_name] || "#{table_name_prefix}#{Inflector.underscore(Inflector.demodulize(class_name_of_active_record_descendant(self)))}_versions#{table_name_suffix}"            
+          self.versioned_table_name = options[:table_name] || "#{table_name_prefix}#{ActiveSupport::Inflector.underscore(ActiveSupport::Inflector.demodulize(class_name_of_active_record_descendant(self)))}_versions#{table_name_suffix}"            
           self.versioned_inheritance_column = options[:inheritance_column] || "versioned_#{inheritance_column}"
           self.version_column = options[:version_column] || 'version'
           self.version_sequence_name = options[:sequence_name]
