@@ -151,7 +151,7 @@ module Cheat::Controllers
 
   class Browse < R '/b'
     def get
-      @sheets = Sheet.sort_by(&:title)
+      @sheets = Sheet.find(:all, :order => 'title asc')
       render :browse
     end
   end
