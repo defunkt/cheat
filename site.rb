@@ -25,14 +25,6 @@
 
 Camping.goes :Cheat
 
-# for defunkt. campistrano.
-if ARGV.include? '--update'
-  ssh = 'ssh deploy@errtheblog.com'
-  puts `#{ssh} 'cd /var/www/cheat; svn up'`
-  system "#{ssh} 'sudo /etc/init.d/rv restart'"
-  exit
-end
-
 URL  = ARGV.include?('debug') ? 'http://localhost:8020' : 'http://cheat.errtheblog.com'
 FEED = 'http://feeds.feedburner.com/cheatsheets' # rss feed
 
@@ -608,6 +600,7 @@ if __FILE__ == $0
   puts "** Cheat is running at http://0.0.0.0:8020/"
   server.run.join
 else
+  Cheat.create unless Cheat::Models::Sheet.table_exists?
   dbconfig = YAML.load(File.read('config/database.yml'))
   Cheat::Models::Base.establish_connection dbconfig['production']
 end
