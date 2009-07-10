@@ -125,7 +125,10 @@ module Cheat::Controllers
 
       check_captcha! unless input.from_gem
 
-      if !@error && @sheet.update_attributes(:title => input.sheet_title, :body => input.sheet_body)
+      @sheet.title = input.sheet_title
+      @sheet.body = input.sheet_body
+
+      if !@error && @sheet.save
         redirect "#{URL}/s/#{@sheet.title}"
       else
         @error = true
