@@ -35,6 +35,10 @@ module Cheat::Models
     validates_presence_of   :title, :body
     before_save { |r| r.title = r.title.gsub(' ', '_').underscore.downcase }
     acts_as_versioned
+
+    def changed_attributes
+      {}
+    end
   end
 
   class SetUpUsTheCheat < V 1.0
