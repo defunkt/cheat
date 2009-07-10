@@ -158,7 +158,7 @@ module Cheat::Controllers
 
   class Show < R '/s/(\w+)', '/s/(\w+)/(\d+)'
     def get(title, version = nil)
-      @sheet = Sheet.detect { |s| s.title == title }
+      @sheet = Sheet.find_by_title(title)
       @sheet = @sheet.find_version(version) if version && @sheet
 
       @sheet ? render(:show) : redirect("#{URL}/b/")
