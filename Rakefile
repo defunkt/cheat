@@ -1,6 +1,7 @@
 # ripped off of jamis buck's lovely net::sftp rakefile
 
 require 'rubygems'
+require 'rubygems/gem_runner'
 require 'rake'
 
 PACKAGE_NAME    = "cheat"
@@ -18,8 +19,6 @@ PACKAGE_FILES = FileList.new do |fl|
   fl.include "LICENSE"
   fl.include SOURCE_FILES
 end
-
-Gem.manage_gems
 
 desc "Default task"
 task :default => [ :package ]
