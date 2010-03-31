@@ -31,7 +31,7 @@ module Cheat
     open(uri, headers) do |body|
       sheet = body.read
       FileUtils.mkdir_p(cache_dir) unless File.exists?(cache_dir)
-      File.open(cache_file, 'w') { |f| f.write(sheet) } if try_to_cache && cache_file && !@edit 
+      File.open(cache_file, 'w') { |f| f.write(sheet) } if try_to_cache && has_content(sheet) && cache_file && !@edit 
       @edit ? edit(sheet) : show(sheet)
     end 
     exit
@@ -76,6 +76,13 @@ module Cheat
     uri += "/#{new_version}" if new_version
 
     fetch_sheet(uri, false) 
+  end
+
+  def has_content(sheet)
+    if sheet.is_a?(String)
+      return (sheet.length > 15) && !sheet[0,14].include?("Error!")
+    end
+    return true
   end
 
   def cache_file
