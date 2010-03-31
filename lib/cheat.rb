@@ -54,11 +54,12 @@ module Cheat
     show_versions(args.first) if args.delete('--versions')
 
     add(args.shift) and return if args.delete('--add')
-    clear_cache if @edit = args.delete('--edit')
+    incoming_file = true if @edit = args.delete('--edit')
     
     @execute = true if args.delete("--execute") || args.delete("-x")
     @sheet = args.shift
 
+    clear_cache_file if incoming_file
     true
   end
 
@@ -175,7 +176,7 @@ module Cheat
       puts "Here's what you wrote, so it isn't lost in the void:" 
       puts text
     else
-      puts "Success!  Try it!", "$ cheat #{title} --new"
+      puts "Success!  Try it!", "$ cheat #{title}"
     end
   end
 
@@ -199,6 +200,10 @@ module Cheat
 
   def clear_cache
     FileUtils.rm_rf(cache_dir) if cache_dir
+  end
+
+  def clear_cache_file
+    FileUtils.rm(cache_file) if File.exists?(cache_file) 
   end
 
   def run_pager
