@@ -1,5 +1,5 @@
 $:.unshift File.dirname(__FILE__)
-%w( rubygems tempfile fileutils net/http yaml open-uri wrap ).each { |f| require f }
+%w( rubygems tempfile fileutils net/http yaml open-uri cheat/wrap ).each { |f| require f }
 RUBY_PLATFORM = PLATFORM unless defined? RUBY_PLATFORM   # Ruby 1.8 compatibility
 
 module Cheat
