@@ -5,7 +5,6 @@
 # url: http://blog.evanweaver.com/articles/2006/12/19/rv-a-tool-for-luxurious-camping
 # license: AFL 3.0
 
-require 'rubygems'
 require 'mongrel'
 require 'mongrel/camping'
 LOGFILE = 'mongrel.log'

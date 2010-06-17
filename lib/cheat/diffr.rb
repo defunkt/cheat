@@ -1,4 +1,3 @@
-require 'rubygems'
 require 'diff/lcs'
 require 'diff/lcs/hunk'
 
