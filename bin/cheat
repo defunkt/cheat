@@ -1,4 +1,10 @@
 #!/usr/bin/env ruby
-require 'rubygems'
-require 'cheat'
+
+begin
+  require 'cheat'
+rescue LoadError
+  require 'rubygems'
+  require 'cheat'
+end
+
 Cheat.sheets(ARGV)
