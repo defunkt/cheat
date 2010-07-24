@@ -1,6 +1,6 @@
 # class Something < R 'route'
 #   include Responder
-#   
+#
 #   def get
 #    ... important code ...
 #
@@ -24,7 +24,7 @@ module Cheat::Controllers
       attr_reader :body, :content_type
       def initialize(accept) @accept = accept end
 
-      TYPES = { 
+      TYPES = {
         :yaml => %w[application/yaml text/yaml],
         :text => %w[text/plain],
         :html => %w[text/html */* application/html],
@@ -33,7 +33,7 @@ module Cheat::Controllers
 
       def method_missing(method, *args)
         if TYPES[method] && @accept =~ Regexp.union(*TYPES[method])
-          @content_type = TYPES[method].first 
+          @content_type = TYPES[method].first
           @body = yield if block_given?
         end
       end

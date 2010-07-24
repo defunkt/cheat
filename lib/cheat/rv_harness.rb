@@ -15,7 +15,7 @@ PORT = ARGV[0].to_i
 ADDR = ARGV[1]
 
 # this is your camping app
-require 'site' 
+require 'site'
 app = Cheat
 
 # custom database configuration
@@ -29,7 +29,7 @@ config = Mongrel::Configurator.new :host => ADDR, :pid_file => PIDFILE do
   listener :port => PORT do
     uri '/', :handler => Mongrel::Camping::CampingHandler.new(app)
     # use the mongrel static server in production instead of the camping controller
-    uri '/static/', :handler => Mongrel::DirHandler.new("static/")    
+    uri '/static/', :handler => Mongrel::DirHandler.new("static/")
     uri '/favicon.ico', :handler => Mongrel::Error404Handler.new('')
     setup_signals
     run
