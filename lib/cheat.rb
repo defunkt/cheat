@@ -2,6 +2,10 @@
 require 'pager'
 RUBY_PLATFORM = PLATFORM unless defined? RUBY_PLATFORM   # Ruby 1.8 compatibility
 
+def mswin?
+  (RUBY_PLATFORM =~ /(:?mswin|mingw)/) || (RUBY_PLATFORM == 'java' && (ENV['OS'] || ENV['os']) =~ /windows/i)
+end
+
 module Cheat
   include Pager
   extend self
@@ -187,7 +191,7 @@ module Cheat
   end
 
   def cache_dir
-    RUBY_PLATFORM =~ /win32/ ? win32_cache_dir : File.join(File.expand_path("~"), ".cheat")
+    mswin? ? win32_cache_dir : File.join(File.expand_path("~"), ".cheat")
   end
 
   def win32_cache_dir
