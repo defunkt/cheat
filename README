@@ -4,7 +4,7 @@ Cheat is a simple command line reference utility.  Use it to retrieve handy
 information from the cheat sheet repository.
 
 $ cheat sheets
-$ cheat cheat
+$ cheat cheats
 $ cheat recent
 
 To freshen your local cache, supply the --new edit.
