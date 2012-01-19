@@ -22,7 +22,7 @@ module Cheat
       return open(uri, headers) { |body| process(body.read) }
     end
 
-    return process(File.read(cache_file)) if File.exists?(cache_file) rescue clear_cache if cache_file 
+    return process(File.read(cache_file)) if File.exists?(cache_file) rescue clear_cache if cache_file
 
     fetch_sheet(uri + @sheet) if @sheet
   end
@@ -31,9 +31,9 @@ module Cheat
     open(uri, headers) do |body|
       sheet = body.read
       FileUtils.mkdir_p(cache_dir) unless File.exists?(cache_dir)
-      File.open(cache_file, 'w') { |f| f.write(sheet) } if try_to_cache && has_content(sheet) && cache_file && !@edit 
+      File.open(cache_file, 'w') { |f| f.write(sheet) } if try_to_cache && has_content(sheet) && cache_file && !@edit
       @edit ? edit(sheet) : show(sheet)
-    end 
+    end
     exit
   rescue OpenURI::HTTPError => e
     puts "Whoa, some kind of Internets error!", "=> #{e} from #{uri}"
@@ -48,14 +48,14 @@ module Cheat
     end
 
     if i = args.index('--diff')
-      diff_sheets(args.first, args[i+1]) 
+      diff_sheets(args.first, args[i+1])
     end
 
     show_versions(args.first) if args.delete('--versions')
 
     add(args.shift) and return if args.delete('--add')
     incoming_file = true if @edit = args.delete('--edit')
-    
+
     @execute = true if args.delete("--execute") || args.delete("-x")
     @sheet = args.shift
 
@@ -76,7 +76,7 @@ module Cheat
     uri = "http://#{cheat_uri}/d/#{sheet}/#{old_version}"
     uri += "/#{new_version}" if new_version
 
-    fetch_sheet(uri, false) 
+    fetch_sheet(uri, false)
   end
 
   def has_content(sheet)
@@ -91,9 +91,9 @@ module Cheat
   end
 
   def headers
-    { 'User-Agent' => 'cheat!', 'Accept' => 'text/yaml' } 
+    { 'User-Agent' => 'cheat!', 'Accept' => 'text/yaml' }
   end
-  
+
   def cheat_uri
     "#{HOST}:#{PORT}#{SUFFIX}"
   end
@@ -172,8 +172,8 @@ module Cheat
   def check_errors(result, title, text)
     if result.body =~ /<p class="error">(.+?)<\/p>/m
       puts $1.gsub(/\n/, '').gsub(/<.+?>/, '').squeeze(' ').wrap(80)
-      puts 
-      puts "Here's what you wrote, so it isn't lost in the void:" 
+      puts
+      puts "Here's what you wrote, so it isn't lost in the void:"
       puts text
     else
       puts "Success!  Try it!", "$ cheat #{title}"
@@ -181,7 +181,7 @@ module Cheat
   end
 
   def editor
-    ENV['VISUAL'] || ENV['EDITOR'] || "vim" 
+    ENV['VISUAL'] || ENV['EDITOR'] || "vim"
   end
 
   def cache_dir
@@ -203,7 +203,7 @@ module Cheat
   end
 
   def clear_cache_file
-    FileUtils.rm(cache_file) if File.exists?(cache_file) 
+    FileUtils.rm(cache_file) if File.exists?(cache_file)
   end
 
   def run_pager
