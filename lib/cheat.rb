@@ -1,7 +1,9 @@
 %w( tempfile fileutils net/http yaml open-uri cheat/wrap ).each { |f| require f }
+require 'pager'
 RUBY_PLATFORM = PLATFORM unless defined? RUBY_PLATFORM   # Ruby 1.8 compatibility
 
 module Cheat
+  include Pager
   extend self
 
   HOST = ARGV.include?('debug') ? 'localhost' : 'cheat.errtheblog.com'
@@ -126,7 +128,7 @@ module Cheat
   def show(sheet_yaml)
     sheet = YAML.load(sheet_yaml).to_a.first
     sheet[-1] = sheet.last.join("\n") if sheet[-1].is_a?(Array)
-    run_pager
+    page
     puts sheet.first + ':'
     puts '  ' + sheet.last.gsub("\r",'').gsub("\n", "\n  ").wrap
   rescue Errno::EPIPE
@@ -206,33 +208,6 @@ module Cheat
     FileUtils.rm(cache_file) if File.exists?(cache_file)
   end
 
-  def run_pager
-    return if RUBY_PLATFORM =~ /win32/
-    return unless STDOUT.tty?
-
-    read, write = IO.pipe
-
-    unless Kernel.fork # Child process
-      STDOUT.reopen(write)
-      STDERR.reopen(write) if STDERR.tty?
-      read.close
-      write.close
-      return
-    end
-
-    # Parent process, become pager
-    STDIN.reopen(read)
-    read.close
-    write.close
-
-    ENV['LESS'] = 'FSRX' # Don't page if the input is short enough
-
-    # wait until we have input before we start the pager
-    Kernel.select [STDIN]
-    pager = ENV['PAGER'] || 'less'
-    exec pager rescue exec "/bin/sh", "-c", pager
-  rescue
-  end
 end
 
 Cheat.sheets(ARGV) if __FILE__ == $0
