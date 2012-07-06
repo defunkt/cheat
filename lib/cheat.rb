@@ -17,14 +17,19 @@ module Cheat
 
     uri = "http://#{cheat_uri}/y/"
 
-    if %w[sheets all recent].include? @sheet
-      uri = uri.sub('/y/', @sheet == 'recent' ? '/yr/' : '/ya/')
-      return open(uri, headers) { |body| process(body.read) }
+    if @offline
+      return process(File.read(cache_file)) if File.exists?(cache_file) rescue clear_cache if cache_file 
+    
+    else
+      if %w[sheets all recent].include? @sheet
+        uri = uri.sub('/y/', @sheet == 'recent' ? '/yr/' : '/ya/')
+        return open(uri, headers) { |body| process(body.read) }
+      end
+    
+      return process(File.read(cache_file)) if File.exists?(cache_file) rescue clear_cache if cache_file 
+
+      fetch_sheet(uri + @sheet) if @sheet
     end
-
-    return process(File.read(cache_file)) if File.exists?(cache_file) rescue clear_cache if cache_file 
-
-    fetch_sheet(uri + @sheet) if @sheet
   end
 
   def fetch_sheet(uri, try_to_cache = true)
@@ -53,10 +58,14 @@ module Cheat
 
     show_versions(args.first) if args.delete('--versions')
 
+    list if args.delete('--list')
+    
     add(args.shift) and return if args.delete('--add')
     incoming_file = true if @edit = args.delete('--edit')
     
     @execute = true if args.delete("--execute") || args.delete("-x")
+    # use offline (use cached versions only) if no active connection to internet
+    @offline = true if args.delete("--local") || args.delete("-l")
     @sheet = args.shift
 
     clear_cache_file if incoming_file
@@ -120,6 +129,13 @@ module Cheat
       execute(sheet_yaml)
     else
       show(sheet_yaml)
+    end
+  end
+  
+  def list
+    if cache_dir
+      d = Dir.glob "#{cache_dir}/#{@sheet}*.yml"
+      d.each {|f| puts File.basename(f, ".yml")}
     end
   end
 
