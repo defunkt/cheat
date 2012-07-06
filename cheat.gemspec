@@ -17,6 +17,8 @@ Gem::Specification.new do |s|
   s.files            += Dir.glob("man/**/*")
   s.files            += Dir.glob("test/**/*")
 
+  s.add_dependency    "pager", "~> 1.0"
+
   s.executables       = %w( cheat )
   s.description       = <<desc
   cheat prints cheat sheets from cheat.errtheblog.com, a wiki-like
