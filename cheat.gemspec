@@ -1,27 +1,23 @@
-$LOAD_PATH.unshift 'lib'
-require "cheat/version"
+# encoding: utf-8
+require File.expand_path("../lib/cheat/version", __FILE__)
 
-Gem::Specification.new do |s|
-  s.name              = "cheat"
-  s.version           = Cheat::VERSION
-  s.date              = Time.now.strftime('%Y-%m-%d')
-  s.summary           = "cheat prints cheat sheets from cheat.errtheblog.com"
-  s.homepage          = "http://cheat.errtheblog.com"
-  s.email             = "chris@ozmm.org"
-  s.authors           = [ "Chris Wanstrath" ]
-  s.has_rdoc          = false
-
-  s.files             = %w( README LICENSE )
-  s.files            += Dir.glob("lib/**/*")
-  s.files            += Dir.glob("bin/**/*")
-  s.files            += Dir.glob("man/**/*")
-  s.files            += Dir.glob("test/**/*")
-
-  s.add_dependency    "pager", "~> 1.0"
-
-  s.executables       = %w( cheat )
-  s.description       = <<desc
-  cheat prints cheat sheets from cheat.errtheblog.com, a wiki-like
-  repository of programming knowledge.
-desc
+Gem::Specification.new do |spec|
+  spec.add_dependency  'pager', '~> 1.0'
+  spec.name          = 'cheat'
+  spec.description   = "cheat prints cheat sheets from cheat.errtheblog.com, a wiki-like repository of programming knowledge."
+  spec.summary       = "cheat prints cheat sheets from cheat.errtheblog.com"
+  spec.authors       = ["Chris Wanstrath", "Erik Michaels-Ober"]
+  spec.email         = ["chris@ozmm.org", "sferik@gmail.com"]
+  spec.bindir        = 'bin'
+  spec.executables   = %w(cheat)
+  spec.files         = %w(README LICENSE)
+  spec.files         += Dir.glob("bin/**/*")
+  spec.files         += Dir.glob("lib/**/*")
+  spec.files         += Dir.glob("man/**/*")
+  spec.files         += Dir.glob("test/**/*")
+  spec.homepage      = 'http://cheat.errtheblog.com'
+  spec.licenses      = ['MIT']
+  spec.require_paths = ['lib']
+  spec.required_rubygems_version = Gem::Requirement.new(">= 1.3.6")
+  spec.version       = Cheat::Version
 end
