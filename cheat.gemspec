@@ -5,6 +5,7 @@ require 'cheat/version'
 
 Gem::Specification.new do |spec|
   spec.add_dependency  'pager', '~> 1.0'
+  spec.add_development_dependency 'bundler', '~> 1.0'
   spec.name          = 'cheat'
   spec.description   = "cheat prints cheat sheets from cheat.errtheblog.com, a wiki-like repository of programming knowledge."
   spec.summary       = "cheat prints cheat sheets from cheat.errtheblog.com"
