@@ -21,6 +21,6 @@ Gem::Specification.new do |spec|
   spec.homepage      = 'http://cheat.errtheblog.com'
   spec.licenses      = ['MIT']
   spec.require_paths = ['lib']
-  spec.required_rubygems_version = '>= 1.3.6'
+  spec.required_rubygems_version = '>= 1.3.5'
   spec.version       = Cheat::Version
 end
