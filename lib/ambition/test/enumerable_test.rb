@@ -12,7 +12,7 @@ context "Each" do
   specify "limit and conditions" do
     hash = { :limit => '5', :conditions => "users.`age` = 21" }
     User.expects(:find).with(:all, hash).returns([])
-    User.select { |m| m.age == 21 }.first(5).each do |user|
+    User.find { |m| m.age == 21 }(5).each do |user|
       puts user.name
     end
   end

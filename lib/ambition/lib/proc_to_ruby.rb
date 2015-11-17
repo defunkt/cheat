@@ -6,13 +6,13 @@ require 'sexp_processor'
 
 class Method
   def with_class_and_method_name
-    if self.inspect =~ /<Method: (.*)\#(.*)>/ then
-      klass = eval $1
-      method  = $2.intern
-      raise "Couldn't determine class from #{self.inspect}" if klass.nil?
+    if inspect =~ /<Method: (.*)\#(.*)>/
+      klass = eval Regexp.last_match(1)
+      method  = Regexp.last_match(2).intern
+      fail "Couldn't determine class from #{inspect}" if klass.nil?
       return yield(klass, method)
     else
-      raise "Can't parse signature: #{self.inspect}"
+      fail "Can't parse signature: #{inspect}"
     end
   end
 
@@ -30,7 +30,7 @@ class Proc
   end
 
   def to_sexp
-    body = self.to_method.to_sexp[2][1..-1]
+    body = to_method.to_sexp[2][1..-1]
     [:proc, *body]
   end
 end

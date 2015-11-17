@@ -22,16 +22,18 @@ module Cheat::Controllers
 
     class Response
       attr_reader :body, :content_type
-      def initialize(accept) @accept = accept end
+      def initialize(accept)
+        @accept = accept
+      end
 
       TYPES = {
-        :yaml => %w[application/yaml text/yaml],
-        :text => %w[text/plain],
-        :html => %w[text/html */* application/html],
-        :xml  => %w[application/xml]
+        yaml: %w(application/yaml text/yaml),
+        text: %w(text/plain),
+        html: %w(text/html */* application/html),
+        xml: %w(application/xml)
       }
 
-      def method_missing(method, *args)
+      def method_missing(method, *_args)
         if TYPES[method] && @accept =~ Regexp.union(*TYPES[method])
           @content_type = TYPES[method].first
           @body = yield if block_given?

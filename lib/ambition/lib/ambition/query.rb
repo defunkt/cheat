@@ -8,22 +8,22 @@ module Ambition
       @clauses    = []
     end
 
-    def add(clause) 
+    def add(clause)
       @clauses << clause
       self
     end
 
-    def query_context 
+    def query_context
       self
     end
 
-    def method_missing(method, *args, &block) 
+    def method_missing(method, *args, &block)
       with_context do
         @owner.send(method, *args, &block)
       end
     end
 
-    def with_context 
+    def with_context
       @owner.query_context = self
       ret = yield
     ensure
@@ -64,7 +64,7 @@ module Ambition
       sql << "ORDER BY #{hash[:order].join(', ')}"      unless hash[:order].blank?
       sql << "LIMIT #{hash[:limit].join(', ')}"         unless hash[:limit].blank?
 
-      @@select % [ @table_name, sql.join(' ') ]
+      @@select % [@table_name, sql.join(' ')]
     end
     alias_method :to_sql, :to_s
 

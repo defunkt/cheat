@@ -1,6 +1,6 @@
 %w( tempfile fileutils net/http yaml open-uri cheat/wrap ).each { |f| require f }
 require 'pager'
-RUBY_PLATFORM = PLATFORM unless defined? RUBY_PLATFORM   # Ruby 1.8 compatibility
+RUBY_PLATFORM = PLATFORM unless defined? RUBY_PLATFORM # Ruby 1.8 compatibility
 
 def mswin?
   (RUBY_PLATFORM =~ /(:?mswin|mingw)/) || (RUBY_PLATFORM == 'java' && (ENV['OS'] || ENV['os']) =~ /windows/i)
@@ -19,18 +19,26 @@ module Cheat
 
     return unless parse_args(args)
 
-    FileUtils.mkdir(cache_dir) unless File.exists?(cache_dir) if cache_dir
+    FileUtils.mkdir(cache_dir) unless File.exist?(cache_dir) if cache_dir
 
     uri = "http://#{cheat_uri}/y/"
 
     if @offline
-      return process(File.read(cache_file)) if File.exists?(cache_file) rescue clear_cache if cache_file
+      begin
+        return process(File.read(cache_file)) if File.exist?(cache_file)
+      rescue
+        clear_cache
+      end if cache_file
     else
-      if %w[sheets all recent].include? @sheet
+      if %w(sheets all recent).include? @sheet
         uri = uri.sub('/y/', @sheet == 'recent' ? '/yr/' : '/ya/')
         return open(uri, headers) { |body| process(body.read) }
       end
-      return process(File.read(cache_file)) if File.exists?(cache_file) rescue clear_cache if cache_file
+      begin
+        return process(File.read(cache_file)) if File.exist?(cache_file)
+      rescue
+        clear_cache
+      end if cache_file
       fetch_sheet(uri + @sheet) if @sheet
     end
   end
@@ -38,13 +46,13 @@ module Cheat
   def fetch_sheet(uri, try_to_cache = true)
     open(uri, headers) do |body|
       sheet = body.read
-      FileUtils.mkdir_p(cache_dir) unless File.exists?(cache_dir)
+      FileUtils.mkdir_p(cache_dir) unless File.exist?(cache_dir)
       File.open(cache_file, 'w') { |f| f.write(sheet) } if try_to_cache && has_content(sheet) && cache_file && !@edit
       @edit ? edit(sheet) : show(sheet)
     end
     exit
   rescue OpenURI::HTTPError => e
-    puts "Whoa, some kind of Internets error!", "=> #{e} from #{uri}"
+    puts 'Whoa, some kind of Internets error!', "=> #{e} from #{uri}"
   end
 
   def parse_args(args)
@@ -56,7 +64,7 @@ module Cheat
     end
 
     if i = args.index('--diff')
-      diff_sheets(args.first, args[i+1])
+      diff_sheets(args.first, args[i + 1])
     end
 
     show_versions(args.first) if args.delete('--versions')
@@ -66,9 +74,9 @@ module Cheat
     add(args.shift) and return if args.delete('--add')
     incoming_file = true if @edit = args.delete('--edit')
 
-    @execute = true if args.delete("--execute") || args.delete("-x")
+    @execute = true if args.delete('--execute') || args.delete('-x')
     # use offline (use cached versions only) if no active connection to internet
-    @offline = true if args.delete("--local") || args.delete("-l")
+    @offline = true if args.delete('--local') || args.delete('-l')
     @sheet = args.shift
 
     clear_cache_file if incoming_file
@@ -83,7 +91,8 @@ module Cheat
   # $ cheat greader --diff 1[:3]
   def diff_sheets(sheet, version)
     return unless version =~ /^(\d+)(:(\d+))?$/
-    old_version, new_version = $1, $3
+    old_version = Regexp.last_match(1)
+    new_version = Regexp.last_match(3)
 
     uri = "http://#{cheat_uri}/d/#{sheet}/#{old_version}"
     uri += "/#{new_version}" if new_version
@@ -93,9 +102,9 @@ module Cheat
 
   def has_content(sheet)
     if sheet.is_a?(String)
-      return (sheet.length > 15) && !sheet[0,14].include?("Error!")
+      return (sheet.length > 15) && !sheet[0, 14].include?('Error!')
     end
-    return true
+    true
   end
 
   def cache_file
@@ -112,14 +121,14 @@ module Cheat
 
   def execute(sheet_yaml)
     sheet_body = YAML.load(sheet_yaml).to_a.flatten.last
-    puts "\n  " + sheet_body.gsub("\r",'').gsub("\n", "\n  ").wrap
+    puts "\n  " + sheet_body.delete("\r").gsub("\n", "\n  ").wrap
     puts "\nWould you like to execute the above sheet? (Y/N)"
     answer = STDIN.gets
     case answer.chomp
-    when "Y" then system YAML.load(sheet_yaml).to_a.flatten.last
-    when "N" then puts "Not executing sheet."
+    when 'Y' then system YAML.load(sheet_yaml).to_a.flatten.last
+    when 'N' then puts 'Not executing sheet.'
     else
-      puts "Must be Y or N!"
+      puts 'Must be Y or N!'
     end
   rescue Errno::EPIPE
     # do nothing
@@ -138,7 +147,7 @@ module Cheat
   def list
     if cache_dir
       d = Dir.glob "#{cache_dir}/#{@sheet}*.yml"
-      d.each {|f| puts File.basename(f, ".yml")}
+      d.each { |f| puts File.basename(f, '.yml') }
     end
   end
 
@@ -147,7 +156,7 @@ module Cheat
     sheet[-1] = sheet.last.join("\n") if sheet[-1].is_a?(Array)
     page
     puts sheet.first + ':'
-    puts '  ' + sheet.last.gsub("\r",'').gsub("\n", "\n  ").wrap
+    puts '  ' + sheet.last.delete("\r").gsub("\n", "\n  ").wrap
   rescue Errno::EPIPE
     # do nothing
   rescue
@@ -156,8 +165,9 @@ module Cheat
 
   def edit(sheet_yaml)
     sheet = YAML.load(sheet_yaml).to_a.first
-    sheet[-1] = sheet.last.gsub("\r", '')
-    body, title = write_to_tempfile(*sheet), sheet.first
+    sheet[-1] = sheet.last.delete("\r")
+    body = write_to_tempfile(*sheet)
+    title = sheet.first
     return if body.strip == sheet.last.strip
     res = post_sheet(title, body)
     check_errors(res, title, body)
@@ -172,7 +182,7 @@ module Cheat
   def post_sheet(title, body, new = false)
     uri = "http://#{cheat_uri}/w/"
     uri += title unless new
-    Net::HTTP.post_form(URI.parse(uri), "sheet_title" => title, "sheet_body" => body.strip, "from_gem" => true)
+    Net::HTTP.post_form(URI.parse(uri), 'sheet_title' => title, 'sheet_body' => body.strip, 'from_gem' => true)
   end
 
   def write_to_tempfile(title, body = nil)
@@ -190,27 +200,27 @@ module Cheat
 
   def check_errors(result, title, text)
     if result.body =~ /<p class="error">(.+?)<\/p>/m
-      puts $1.gsub(/\n/, '').gsub(/<.+?>/, '').squeeze(' ').wrap(80)
+      puts Regexp.last_match(1).gsub(/\n/, '').gsub(/<.+?>/, '').squeeze(' ').wrap(80)
       puts
       puts "Here's what you wrote, so it isn't lost in the void:"
       puts text
     else
-      puts "Success!  Try it!", "$ cheat #{title}"
+      puts 'Success!  Try it!', "$ cheat #{title}"
     end
   end
 
   def editor
-    ENV['VISUAL'] || ENV['EDITOR'] || "vim"
+    ENV['VISUAL'] || ENV['EDITOR'] || 'vim'
   end
 
   def cache_dir
-    mswin? ? win32_cache_dir : File.join(File.expand_path("~"), ".cheat")
+    mswin? ? win32_cache_dir : File.join(File.expand_path('~'), '.cheat')
   end
 
   def win32_cache_dir
-    unless File.exists?(home = ENV['HOMEDRIVE'] + ENV['HOMEPATH'])
-      puts "No HOMEDRIVE or HOMEPATH environment variable.  Set one to save a" +
-           "local cache of cheat sheets."
+    unless File.exist?(home = ENV['HOMEDRIVE'] + ENV['HOMEPATH'])
+      puts 'No HOMEDRIVE or HOMEPATH environment variable.  Set one to save a' \
+           'local cache of cheat sheets.'
       return false
     else
       return File.join(home, 'Cheat')
@@ -222,9 +232,8 @@ module Cheat
   end
 
   def clear_cache_file
-    FileUtils.rm(cache_file) if File.exists?(cache_file)
+    FileUtils.rm(cache_file) if File.exist?(cache_file)
   end
-
 end
 
-Cheat.sheets(ARGV) if __FILE__ == $0
+Cheat.sheets(ARGV) if __FILE__ == $PROGRAM_NAME
