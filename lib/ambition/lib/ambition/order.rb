@@ -5,7 +5,7 @@ module Ambition
     end
   end
 
-  class OrderProcessor < Processor 
+  class OrderProcessor < Processor
     def initialize(table_name, block)
       super()
       @receiver    = nil
@@ -27,7 +27,7 @@ module Ambition
       if (method = exp.shift) == :rand
         'RAND()'
       else
-        raise "Not implemented: :vcall for #{method}"
+        fail "Not implemented: :vcall for #{method}"
       end
     end
 
@@ -38,7 +38,7 @@ module Ambition
 
     ##
     # Helpers!
-    def translation(receiver, method, other)
+    def translation(receiver, method, _other)
       case method
       when :-@
         "#{process(receiver)} DESC"

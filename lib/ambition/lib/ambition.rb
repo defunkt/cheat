@@ -8,7 +8,7 @@ require 'ambition/limit'
 require 'ambition/count'
 require 'ambition/enumerable'
 
-module Ambition 
+module Ambition
   include Where, Order, Limit, Enumerable, Count
 
   attr_accessor :query_context

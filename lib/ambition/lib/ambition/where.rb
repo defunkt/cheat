@@ -11,11 +11,11 @@ module Ambition
     end
 
     def detect(&block)
-      select(&block).first
+      find(&block)
     end
   end
 
-  class WhereProcessor < Processor 
+  class WhereProcessor < Processor
     attr_reader :includes
 
     def initialize(owner, block)
@@ -41,14 +41,14 @@ module Ambition
     def process_not(exp)
       _, receiver, method, other = *exp.first
       exp.clear
-      return translation(receiver, negate(method), other)
+      translation(receiver, negate(method), other)
     end
 
     def process_call(exp)
       receiver, method, other = *exp
       exp.clear
 
-      return translation(receiver, method, other)
+      translation(receiver, method, other)
     end
 
     def process_lit(exp)
@@ -59,20 +59,21 @@ module Ambition
       sanitize exp.shift
     end
 
-    def process_nil(exp)
+    def process_nil(_exp)
       'NULL'
     end
 
-    def process_false(exp)
+    def process_false(_exp)
       sanitize 'false'
     end
 
-    def process_true(exp)
+    def process_true(_exp)
       sanitize 'true'
     end
 
     def process_match3(exp)
-      regexp, target = exp.shift.last.inspect.gsub('/',''), process(exp.shift)
+      regexp = exp.shift.last.inspect.delete('/')
+      target = process(exp.shift)
       "#{target} REGEXP '#{regexp}'"
     end
 
@@ -103,7 +104,7 @@ module Ambition
 
     def process_attrasgn(exp)
       exp.clear
-      raise "Assignment not supported.  Maybe you meant ==?"
+      fail 'Assignment not supported.  Maybe you meant ==?'
     end
 
     ##
@@ -113,7 +114,7 @@ module Ambition
       while clause = exp.shift
         clauses << clause
       end
-      return "(" + clauses.map { |c| process(c) }.join(" #{with} ") + ")"
+      '(' + clauses.map { |c| process(c) }.join(" #{with} ") + ')'
     end
 
     def value(variable)
@@ -122,12 +123,12 @@ module Ambition
 
     def negate(method)
       case method
-      when :== 
+      when :==
         '<>'
       when :=~
         '!~'
-      else 
-        raise "Not implemented: #{method}"
+      else
+        fail "Not implemented: #{method}"
       end
     end
 
@@ -154,7 +155,7 @@ module Ambition
           @includes << reflection.name unless @includes.include? reflection.name
           "#{reflection.table_name}.#{method}"
         else
-          raise "No reflection `#{receiver.last}' found on #{@owner}"
+          fail "No reflection `#{receiver.last}' found on #{@owner}"
         end
       else
         "#{process(receiver)}.`#{method}` #{process(other)}"

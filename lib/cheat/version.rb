@@ -1,7 +1,6 @@
 module Cheat
   class Version
     class << self
-
       # @return [Integer]
       def major
         1
@@ -26,7 +25,6 @@ module Cheat
       def to_s
         [major, minor, patch, pre].compact.join('.')
       end
-
     end
   end
 end

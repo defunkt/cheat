@@ -2,7 +2,7 @@ require File.dirname(__FILE__) + '/helper'
 
 ##
 # Once dynamically, once hardcoded
-context "Different types" do
+context 'Different types' do
   types_hash = {
     'string' => "'string'",
     :symbol  => "'--- :symbol\n'",
@@ -23,34 +23,34 @@ context "Different types" do
     end
   end
 
-  specify "float" do
+  specify 'float' do
     sql = User.select { |m| m.name == 1.2 }.to_sql
-    sql.should == "SELECT * FROM users WHERE users.`name` = 1.2"
+    sql.should == 'SELECT * FROM users WHERE users.`name` = 1.2'
   end
 
-  specify "integer" do
+  specify 'integer' do
     sql = User.select { |m| m.name == 1 }.to_sql
-    sql.should == "SELECT * FROM users WHERE users.`name` = 1"
+    sql.should == 'SELECT * FROM users WHERE users.`name` = 1'
   end
 
-  specify "true" do
+  specify 'true' do
     sql = User.select { |m| m.name == true }.to_sql
-    sql.should == "SELECT * FROM users WHERE users.`name` = 1"
+    sql.should == 'SELECT * FROM users WHERE users.`name` = 1'
   end
 
-  specify "false" do
+  specify 'false' do
     sql = User.select { |m| m.name == false }.to_sql
-    sql.should == "SELECT * FROM users WHERE users.`name` = 0"
+    sql.should == 'SELECT * FROM users WHERE users.`name` = 0'
   end
 
-  specify "nil" do
-    sql = User.select { |m| m.name == nil }.to_sql
-    sql.should == "SELECT * FROM users WHERE users.`name` = NULL"
+  specify 'nil' do
+    sql = User.select { |m| m.name.nil? }.to_sql
+    sql.should == 'SELECT * FROM users WHERE users.`name` = NULL'
   end
 
-  xspecify "Time" do
+  xspecify 'Time' do
     # TODO: nothing but variables inside blocks for now
     sql = User.select { |m| m.name == Time.now }.to_sql
-    sql.should == "SELECT * FROM users WHERE users.`name` = NULL"
+    sql.should == 'SELECT * FROM users WHERE users.`name` = NULL'
   end
 end

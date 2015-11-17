@@ -18,7 +18,7 @@ module Ambition
     end
   end
 
-  class LimitProcessor 
+  class LimitProcessor
     def initialize(*args)
       @args = args
     end
